@@ -29,7 +29,7 @@ const JobSchema = new mongoose.Schema(
     overview: { type: String, required: true },
     description: { type: String, required: true },
     requirements_and_responsibilities: { type: [String], required: true },
-    time_posted: { type: Date },
+    time_posted: { type: String },
     logo_url: { type: Buffer },
     banner_url: { type: Buffer },
     job_status: { type: String, enum: jobStatus, default: "Opening" },
