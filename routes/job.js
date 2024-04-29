@@ -1,5 +1,6 @@
 const Job = require("../models/Job");
 const { verifyToken } = require("./verifyToken");
+const axios = require("axios");
 
 const router = require("express").Router();
 
@@ -180,6 +181,24 @@ router.put("/status/:jobId", verifyToken, async (req, res) => {
     const updatedJob = await job.save();
 
     res.status(200).json(updatedJob);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//GET USER DATA BASED ON JOB IDs
+router.post("/jobs/details", async (req, res) => {
+  const { jobIds } = req.body;
+  // const userIds = candidateIds.split(",");
+
+  if (!jobIds) {
+    return res.status(404).json({ error: "jobIds not found" });
+  }
+
+  try {
+    const users = await Job.find({ _id: { $in: jobIds } });
+
+    res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
