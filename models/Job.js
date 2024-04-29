@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+const jobStatus = ["Opening", "Close"];
+
 const JobSchema = new mongoose.Schema(
   {
     userId: { type: String, required: true },
@@ -10,14 +12,28 @@ const JobSchema = new mongoose.Schema(
     experience_level: { type: String, required: true },
     type_of_employment: { type: String, required: true },
     salary_range: { type: String },
-    experience: { type: String, required: true },
-    education: { type: String, required: true },
+    experience: [
+      {
+        experiencedYears: { type: String },
+        experiencedArea: { type: String },
+      },
+    ],
+    experience_job_post: { type: String },
+    education: [
+      {
+        educationtype: { type: String },
+        educationfield: { type: String },
+      },
+    ],
+    education_job_post: { type: String },
     overview: { type: String, required: true },
     description: { type: String, required: true },
     requirements_and_responsibilities: { type: [String], required: true },
     time_posted: { type: Date },
-    logo_url: { type: String },
-    banner_url: { type: String },
+    logo_url: { type: Buffer },
+    banner_url: { type: Buffer },
+    job_status: { type: String, enum: jobStatus, default: "Opening" },
+    candidate_id_list: { type: [String] },
   },
   { timestamps: true }
 );

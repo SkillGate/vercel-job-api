@@ -19,7 +19,7 @@ router.put("/:id", verifyToken, async (req, res) => {
   if (!req.params.id) {
     return res.status(400).json({ error: "ID is required" });
   }
-  
+
   try {
     const updatedJob = await Job.findByIdAndUpdate(
       req.params.id,
@@ -109,6 +109,77 @@ router.get("/stats", verifyToken, async (req, res) => {
       },
     ]);
     res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Endpoint for inserting candidate ID into candidate_id_list
+router.put("/apply/:jobId", verifyToken, async (req, res) => {
+  const { candidateId } = req.body;
+  const jobId = req.params.jobId;
+
+  if (!jobId) {
+    return res.status(400).json({ error: "Job ID is required" });
+  }
+
+  if (!candidateId) {
+    return res.status(400).json({ error: "Candidate ID is required" });
+  }
+
+  try {
+    // Find the job by its ID
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    // Push the candidate ID into candidate_id_list array
+    job.candidate_id_list.push(candidateId);
+
+    // Save the updated job
+    const updatedJob = await job.save();
+
+    res.status(200).json(updatedJob);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Endpoint for updating job status
+router.put("/status/:jobId", verifyToken, async (req, res) => {
+  const { jobStatus } = req.body;
+  const jobId = req.params.jobId;
+
+  if (!jobId) {
+    return res.status(400).json({ error: "Job ID is required" });
+  }
+
+  if (!jobStatus || !jobStatus.trim()) {
+    return res.status(400).json({ error: "Job status is required" });
+  }
+
+  // Check if the provided job status is valid
+  if (!["Opening", "Close"].includes(jobStatus)) {
+    return res.status(400).json({ error: "Invalid job status" });
+  }
+
+  try {
+    // Find the job by its ID
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    // Update the job status
+    job.job_status = jobStatus;
+
+    // Save the updated job
+    const updatedJob = await job.save();
+
+    res.status(200).json(updatedJob);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
