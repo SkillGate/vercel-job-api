@@ -34,6 +34,18 @@ const JobSchema = new mongoose.Schema(
     banner_url: { type: Buffer },
     job_status: { type: String, enum: jobStatus, default: "Opening" },
     candidate_id_list: { type: [String] },
+    githubCheckBox: {
+      type: Boolean,
+      default: false,
+    },
+    linkedinCheckBox: {
+      type: Boolean,
+      default: false,
+    },
+    blogsCheckBox: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
