@@ -30,8 +30,8 @@ const JobSchema = new mongoose.Schema(
     description: { type: String, required: true },
     requirements_and_responsibilities: { type: [String], required: true },
     time_posted: { type: String },
-    logo_url: { type: Buffer },
-    banner_url: { type: Buffer },
+    logo_url: { type: String },
+    banner_url: { type: String },
     job_status: { type: String, enum: jobStatus, default: "Opening" },
     candidate_id_list: { type: [String] },
     githubCheckBox: {
