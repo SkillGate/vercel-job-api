@@ -46,6 +46,7 @@ const JobSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    saved_candidate_id_list: { type: [String] },
   },
   { timestamps: true }
 );
