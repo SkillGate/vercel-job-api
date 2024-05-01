@@ -136,6 +136,12 @@ router.put("/apply/:jobId", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "Job not found" });
     }
 
+    if (job.candidate_id_list.includes(candidateId)) {
+      return res
+        .status(400)
+        .json({ error: "Candidate already applied for this job" });
+    }
+
     // Push the candidate ID into candidate_id_list array
     job.candidate_id_list.push(candidateId);
 
