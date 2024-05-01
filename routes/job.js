@@ -154,6 +154,44 @@ router.put("/apply/:jobId", verifyToken, async (req, res) => {
   }
 });
 
+router.put("/saved/:jobId", verifyToken, async (req, res) => {
+  const { candidateId } = req.body;
+  const jobId = req.params.jobId;
+
+  if (!jobId) {
+    return res.status(400).json({ error: "Job ID is required" });
+  }
+
+  if (!candidateId) {
+    return res.status(400).json({ error: "Candidate ID is required" });
+  }
+
+  try {
+    // Find the job by its ID
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    if (job.saved_candidate_id_list.includes(candidateId)) {
+      return res
+        .status(400)
+        .json({ error: "Candidate already applied for this job" });
+    }
+
+    // Push the candidate ID into saved_candidate_id_list array
+    job.saved_candidate_id_list.push(candidateId);
+
+    // Save the updated job
+    const updatedJob = await job.save();
+
+    res.status(200).json(updatedJob);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Endpoint for updating job status
 router.put("/status/:jobId", verifyToken, async (req, res) => {
   const { jobStatus } = req.body;
