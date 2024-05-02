@@ -47,6 +47,18 @@ const JobSchema = new mongoose.Schema(
       default: false,
     },
     saved_candidate_id_list: { type: [String] },
+    persona_matching_score: {
+      candidate_id: { type: String },
+      overall_score: { type: Number, default: 0 },
+      education: { type: Number, default: 0 },
+      soft_skills: { type: Number, default: 0 },
+      technical_skills: { type: Number, default: 0 },
+      experience: { type: Number, default: 0 },
+    },
+    w_soft_skills: { type: Number, default: 0.25 },
+    w_technical_skills: { type: Number, default: 0.25 },
+    w_education: { type: Number, default: 0.25 },
+    w_experience: { type: Number, default: 0.25 },
   },
   { timestamps: true }
 );

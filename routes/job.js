@@ -1,4 +1,5 @@
 const Job = require("../models/Job");
+const { MatchingModel } = require("../service/matchingPersona");
 const { verifyToken } = require("./verifyToken");
 const axios = require("axios");
 
@@ -115,9 +116,9 @@ router.get("/stats", verifyToken, async (req, res) => {
   }
 });
 
-// Endpoint for inserting candidate ID into candidate_id_list
 router.put("/apply/:jobId", verifyToken, async (req, res) => {
-  const { candidateId } = req.body;
+  const { candidateId, candidate_persona } = req.body;
+
   const jobId = req.params.jobId;
 
   if (!jobId) {
@@ -128,8 +129,11 @@ router.put("/apply/:jobId", verifyToken, async (req, res) => {
     return res.status(400).json({ error: "Candidate ID is required" });
   }
 
+  if (!candidate_persona) {
+    return res.status(400).json({ error: "Please attach candidate profile" });
+  }
+
   try {
-    // Find the job by its ID
     const job = await Job.findById(jobId);
 
     if (!job) {
@@ -142,13 +146,30 @@ router.put("/apply/:jobId", verifyToken, async (req, res) => {
         .json({ error: "Candidate already applied for this job" });
     }
 
-    // Push the candidate ID into candidate_id_list array
-    job.candidate_id_list.push(candidateId);
+    try {
+      const prediction = await MatchingModel(candidate_persona, job, res);
+      console.log("Prediction:", prediction);
 
-    // Save the updated job
-    const updatedJob = await job.save();
+      const updatedJob = await Job.findByIdAndUpdate(
+        jobId,
+        { persona_matching_score: prediction },
+        { new: true }
+      );
 
-    res.status(200).json(updatedJob);
+      if (!updatedJob) {
+        console.log("Job not found or not updated.");
+      } else {
+        console.log("Job updated successfully:", updatedJob);
+
+        updatedJob.candidate_id_list.push(candidateId);
+
+        const savedJob = await updatedJob.save();
+        console.log("Job saved successfully:", savedJob);
+        res.status(200).json(savedJob);
+      }
+    } catch (error) {
+      console.error("Error updating job:", error);
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
