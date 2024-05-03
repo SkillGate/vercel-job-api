@@ -152,7 +152,7 @@ router.put("/apply/:jobId", verifyToken, async (req, res) => {
 
       const updatedJob = await Job.findByIdAndUpdate(
         jobId,
-        { persona_matching_score: prediction },
+        { $push: { persona_matching_score: prediction } },
         { new: true }
       );
 
