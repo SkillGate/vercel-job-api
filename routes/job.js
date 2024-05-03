@@ -56,7 +56,7 @@ router.get("/find/:id", verifyToken, async (req, res) => {
     return res.status(400).json({ error: "ID is required" });
   }
   try {
-    const job = await Job.findById(req.params.id);
+    const job = await Job.findById(req.params.id).sort({ createdAt: -1 });
     // const { password, ...others } = Job._doc;
     res.status(200).json(job);
   } catch (error) {
@@ -69,8 +69,8 @@ router.get("/", verifyToken, async (req, res) => {
   const query = req.query.new;
   try {
     const jobs = query
-      ? await Job.find().sort({ _id: -1 }).limit(5)
-      : await Job.find();
+      ? await Job.find().sort({ createdAt: -1 }).limit(5)
+      : await Job.find().sort({ createdAt: -1 });
     res.status(200).json(jobs);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -83,7 +83,7 @@ router.get("/find/jobs/:userId", verifyToken, async (req, res) => {
     return res.status(400).json({ error: "UserId is required" });
   }
   try {
-    const Jobs = await Job.find({ userId: req.params.userId });
+    const Jobs = await Job.find({ userId: req.params.userId }).sort({ createdAt: -1 });
     res.status(200).json(Jobs);
   } catch (error) {
     res.status(500).json({ error: error.message });
