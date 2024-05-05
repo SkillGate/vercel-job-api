@@ -56,7 +56,7 @@ const ExplainableAIModel = async (candidatePersona, job, res, category) => {
       category:category
     };
     console.log(requestBody);
-    // const response = await axios.post(`${BASE_URL}/explain`, requestBody.json);
+    // const response = await axios.post(`${BASE_URL}/explain`, requestBody);
     // const response = explainableAICategoryTechnicalSkills;
     const response = explainableAICategoryEducation;
     // console.log(response);
