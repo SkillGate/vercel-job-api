@@ -2,7 +2,7 @@ const axios = require("axios");
 const { BASE_URL } = require("../config/config");
 const { explainableAICategory } = require("../constants/Constant");
 const { getDegreeNames, formatArray, formatCandidateExperience, formatEducation, formatExperience } = require("./matchingPersona");
-const { explainableAICategoryTechnicalSkills } = require("../constants/ExplainableAIData");
+const { explainableAICategoryTechnicalSkills, explainableAICategoryEducation } = require("../constants/ExplainableAIData");
 
 const ExplainableAIModel = async (candidatePersona, job, res, category) => {
   // Check if category is valid
@@ -56,8 +56,9 @@ const ExplainableAIModel = async (candidatePersona, job, res, category) => {
       category:category
     };
     console.log(requestBody);
-    const response = await axios.post(`${BASE_URL}/explain`, requestBody.json);
+    // const response = await axios.post(`${BASE_URL}/explain`, requestBody.json);
     // const response = explainableAICategoryTechnicalSkills;
+    const response = explainableAICategoryEducation;
     // console.log(response);
     return response;
   } catch (error) {
