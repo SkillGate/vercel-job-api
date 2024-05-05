@@ -1,4 +1,5 @@
 const Job = require("../models/Job");
+const ExplainableAIModel = require("../service/explainableAIModel");
 const { MatchingModel } = require("../service/matchingPersona");
 const { verifyToken } = require("./verifyToken");
 const axios = require("axios");
@@ -264,6 +265,71 @@ router.post("/jobs/details", async (req, res) => {
     const users = await Job.find({ _id: { $in: jobIds } });
 
     res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//GET EXPLAINABLE AI DATA
+router.put("/explain/:jobId", verifyToken, async (req, res) => {
+  const { candidateId, candidate_persona, category } = req.body;
+
+  const jobId = req.params.jobId;
+
+  if (!jobId) {
+    return res.status(400).json({ error: "Job ID is required" });
+  }
+
+  if (!candidateId) {
+    return res.status(400).json({ error: "Candidate ID is required" });
+  }
+
+  if (!candidate_persona) {
+    return res.status(400).json({ error: "Please attach candidate profile" });
+  }
+
+  const allowedTypes = [
+    "technical_skills",
+    "education",
+    "soft_skills",
+    "experience",
+  ];
+  if (!allowedTypes.includes(category)) {
+    return res.status(400).json({ error: "Invalid category" });
+  }
+
+  try {
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    try {
+      const prediction = await ExplainableAIModel(candidate_persona, job, res, category);
+      // console.log("Prediction:", prediction);
+
+      // const updatedJob = await Job.findByIdAndUpdate(
+      //   jobId,
+      //   { $push: { persona_matching_score: prediction } },
+      //   { new: true }
+      // );
+
+      // if (!updatedJob) {
+      //   console.log("Job not found or not updated.");
+      // } else {
+      //   console.log("Job updated successfully:", updatedJob);
+
+      //   updatedJob.candidate_id_list.push(candidateId);
+
+      //   const savedJob = await updatedJob.save();
+      //   console.log("Job saved successfully:", savedJob);
+      //   res.status(200).json(savedJob);
+      // }
+      res.status(200).json(prediction);
+    } catch (error) {
+      console.error("Error updating job:", error);
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -94,4 +94,11 @@ function formatCandidateExperience(experienceArray) {
   return `"${formattedString}"`;
 }
 
-module.exports = { MatchingModel };
+module.exports = {
+  MatchingModel,
+  formatArray,
+  formatExperience,
+  formatEducation,
+  getDegreeNames,
+  formatCandidateExperience,
+};
