@@ -6,7 +6,8 @@ const MatchingModel = async (candidatePersona, job, res) => {
     !(
       candidatePersona?.education &&
       candidatePersona?.skills &&
-      candidatePersona?.experience
+      candidatePersona?.experience &&
+      candidatePersona?.soft_skills
     )
   ) {
     return res
@@ -14,7 +15,7 @@ const MatchingModel = async (candidatePersona, job, res) => {
       .json({ error: "Required details not provided in candidate persona!" });
   }
 
-  if (!(job?.education && job?.skills && job?.experience)) {
+  if (!(job?.education && job?.skills && job?.experience && job?.soft_skills)) {
     return res
       .status(400)
       .json({ error: "Required details not provided in job!" });
@@ -23,14 +24,14 @@ const MatchingModel = async (candidatePersona, job, res) => {
   const candidate_persona = {
     education: getDegreeNames(candidatePersona.education),
     technical_skills: formatArray(candidatePersona?.skills),
-    soft_skills: "leadership | problem solving",
+    soft_skills: formatArray(candidatePersona?.soft_skills),
     experience: formatCandidateExperience(candidatePersona?.experience),
   };
 
   const company_persona = {
     education: formatEducation(job?.education),
     technical_skills: formatArray(job?.skills),
-    soft_skills: "leadership | communication skills",
+    soft_skills: formatArray(job?.soft_skills),
     experience: formatExperience(job?.experience),
   };
 
@@ -146,4 +147,14 @@ const BenefitPredictionModel = async (candidatePersona, res) => {
   return response.data.prediction;
 }
 
-module.exports = { MatchingModel , BenefitPredictionModel };
+
+module.exports = {
+  MatchingModel,
+  formatArray,
+  formatExperience,
+  formatEducation,
+  getDegreeNames,
+  formatCandidateExperience,
+  BenefitPredictionModel
+};
+
