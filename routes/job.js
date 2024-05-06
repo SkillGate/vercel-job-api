@@ -151,6 +151,8 @@ router.put("/apply/:jobId", verifyToken, async (req, res) => {
       const prediction = await MatchingModel(candidate_persona, job, res);
       console.log("Prediction:", prediction);
 
+      prediction["candidate_id"] = candidateId;
+
       const updatedJob = await Job.findByIdAndUpdate(
         jobId,
         { $push: { persona_matching_score: prediction } },
