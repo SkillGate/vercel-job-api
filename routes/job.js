@@ -1,9 +1,8 @@
 const Job = require("../models/Job");
+const { MatchingModel,BenefitPredictionModel } = require("../service/matchingPersona");
 const ExplainableAIModel = require("../service/explainableAIModel");
-const { MatchingModel } = require("../service/matchingPersona");
 const { verifyToken } = require("./verifyToken");
 const axios = require("axios");
-
 const router = require("express").Router();
 
 //CREATE
@@ -283,7 +282,6 @@ router.put("/explain/:jobId", verifyToken, async (req, res) => {
   if (!candidateId) {
     return res.status(400).json({ error: "Candidate ID is required" });
   }
-
   if (!candidate_persona) {
     return res.status(400).json({ error: "Please attach candidate profile" });
   }
@@ -329,6 +327,51 @@ router.put("/explain/:jobId", verifyToken, async (req, res) => {
       res.status(200).json(prediction);
     } catch (error) {
       console.error("Error updating job:", error);
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router.post("/getBenefits/:jobId", verifyToken, async (req, res) => {
+
+  console.log("This is the path param:",req.params.jobId)
+  // const { candidateId,candidate_persona } = req.body;
+  const candidateId=req.body.candidateId
+  const candidate_persona=req.body.candidateData[0]
+  const jobId = req.params.jobId;
+  // console.log("This is the candidateId:",candidateId)
+  // console.log("This is the persona:",candidate_persona)
+
+  if (!jobId) {
+    return res.status(400).json({ error: "Job ID is required" });
+  }
+
+  if (!candidateId) {
+    return res.status(400).json({ error: "Candidate ID is required" });
+  }
+  if (!candidate_persona) {
+    return res.status(400).json({ error: "Please attach candidate profile" });
+  }
+
+  try {
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    if (!job.candidate_id_list.includes(candidateId)) {
+      return res
+        .status(400)
+        .json({ error: "Candidate didn't apply for this job" });
+    }
+
+    try {
+      const prediction = await BenefitPredictionModel(candidate_persona, res);
+      // console.log("Prediction:", prediction);
+      res.status(200).json(prediction);
+    } catch (error) {
+      console.error("Error predicting benefits:", error);
     }
   } catch (error) {
     res.status(500).json({ error: error.message });

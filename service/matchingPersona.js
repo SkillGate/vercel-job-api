@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { BASE_URL } = require("../config/config");
+const { BASE_URL,BASE_URL_BENEFIT } = require("../config/config");
 
 const MatchingModel = async (candidatePersona, job, res) => {
   if (
@@ -94,6 +94,60 @@ function formatCandidateExperience(experienceArray) {
   return `"${formattedString}"`;
 }
 
+
+//benefit prediction code.
+function formatCandidateTotalExperience(experienceArray) {
+  let totalDurationMonths = 0;
+
+  experienceArray.forEach((experience) => {
+    const start = new Date(`${experience.startYear}-${experience.startMonth}`);
+    // console.log("start date:",start)
+    const end = experience.currentlyWorking
+      ? new Date()
+      : new Date(`${experience.endYear}-${experience.endMonth}`);
+      // console.log("end date:",end)
+      const duration = (end - start) / (1000 * 60 * 60 * 24 * 30); // Convert milliseconds to months
+      // console.log(duration)
+      if(duration>0){
+        totalDurationMonths += duration;
+      }
+  });
+
+  // Convert total duration to years
+  const totalExperienceYears = parseFloat(totalDurationMonths) / 12;
+
+  return totalExperienceYears // Return total experience in years with two decimal places
+}
+
+
+const BenefitPredictionModel = async (candidatePersona, res) => {
+  if (
+    !(
+      candidatePersona?.education &&
+      candidatePersona?.skills &&
+      candidatePersona?.experience
+    )
+  ) {
+    return res
+      .status(400)
+      .json({ error: "Required details not provided in candidate persona!" });
+  }
+
+
+  const requestBody = {
+    Education: getDegreeNames(candidatePersona.education),
+    technicalSkills: formatArray(candidatePersona?.skills),
+    softSkills: "leadership | problem solving",
+    totalExperience: formatCandidateTotalExperience(candidatePersona?.experience),
+  };
+  console.log(candidatePersona?.experience)
+  // console.log(requestBody.totalExperience)
+  const response = await axios.post(`${BASE_URL_BENEFIT}/predictBenefits`, requestBody);
+
+  return response.data.prediction;
+}
+
+
 module.exports = {
   MatchingModel,
   formatArray,
@@ -101,4 +155,6 @@ module.exports = {
   formatEducation,
   getDegreeNames,
   formatCandidateExperience,
+  BenefitPredictionModel
 };
+
