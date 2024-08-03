@@ -1,3 +1,4 @@
+const { PROD_AUTH_BASE_URL } = require("../config/config");
 const Job = require("../models/Job");
 const ExplainableAIModel = require("../service/explainableAIModel");
 const { MatchingModel } = require("../service/matchingPersona");
@@ -11,6 +12,17 @@ router.post("/", verifyToken, async (req, res) => {
   try {
     const newJob = new Job(req.body);
     const savedJob = await newJob.save();
+
+    const userId = newJob.userId;
+    const token = req.headers.authorization;
+    const increaseJobCountUrl = `${PROD_AUTH_BASE_URL}/user/applications/${userId}`;
+
+    await axios.put(increaseJobCountUrl, null, {
+      headers: {
+        Authorization: token,
+      },
+    });
+
     res.status(201).json(savedJob);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -68,10 +80,14 @@ router.get("/find/:id", verifyToken, async (req, res) => {
 //GET ALL Job
 router.get("/", verifyToken, async (req, res) => {
   const query = req.query.new;
+  const filter = {
+    $or: [{ isActive: { $exists: false } }, { isActive: true }],
+  };
+
   try {
     const jobs = query
-      ? await Job.find().sort({ createdAt: -1 }).limit(5)
-      : await Job.find().sort({ createdAt: -1 });
+      ? await Job.find(filter).sort({ createdAt: -1 }).limit(5)
+      : await Job.find(filter).sort({ createdAt: -1 });
     res.status(200).json(jobs);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -84,7 +100,10 @@ router.get("/find/jobs/:userId", verifyToken, async (req, res) => {
     return res.status(400).json({ error: "UserId is required" });
   }
   try {
-    const Jobs = await Job.find({ userId: req.params.userId }).sort({ createdAt: -1 });
+    const Jobs = await Job.find({
+      userId: req.params.userId,
+      $or: [{ isActive: { $exists: false } }, { isActive: true }],
+    }).sort({ createdAt: -1 });
     res.status(200).json(Jobs);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -308,7 +327,12 @@ router.put("/explain/:jobId", verifyToken, async (req, res) => {
     }
 
     try {
-      const prediction = await ExplainableAIModel(candidate_persona, job, res, category);
+      const prediction = await ExplainableAIModel(
+        candidate_persona,
+        job,
+        res,
+        category
+      );
       // console.log("Prediction:", prediction);
 
       // const updatedJob = await Job.findByIdAndUpdate(
@@ -332,6 +356,68 @@ router.put("/explain/:jobId", verifyToken, async (req, res) => {
     } catch (error) {
       console.error("Error updating job:", error);
     }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update isRemoved
+router.put("/:id/isRemoved", verifyToken, async (req, res) => {
+  try {
+    const jobId = req.params.id;
+    const { isRemoved } = req.body;
+
+    if (typeof isRemoved !== "boolean") {
+      return res
+        .status(400)
+        .json({ error: "isRemoved must be a boolean value" });
+    }
+
+    const updatedJob = await Job.findByIdAndUpdate(
+      jobId,
+      { isRemoved },
+      { new: true }
+    );
+
+    if (!updatedJob) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    res.status(200).json({
+      message: "Job removal status updated successfully",
+      isRemoved: updatedJob.isRemoved,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update isActive
+router.put("/:id/isActive", verifyToken, async (req, res) => {
+  try {
+    const jobId = req.params.id;
+    const { isActive } = req.body;
+
+    if (typeof isActive !== "boolean") {
+      return res
+        .status(400)
+        .json({ error: "isActive must be a boolean value" });
+    }
+
+    const updatedJob = await Job.findByIdAndUpdate(
+      jobId,
+      { isActive },
+      { new: true }
+    );
+
+    if (!updatedJob) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    res.status(200).json({
+      message: "Job status updated successfully",
+      isActive: updatedJob.isActive,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

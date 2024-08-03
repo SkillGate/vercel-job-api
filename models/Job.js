@@ -62,6 +62,11 @@ const JobSchema = new mongoose.Schema(
     w_technical_skills: { type: Number, default: 0.25 },
     w_education: { type: Number, default: 0.25 },
     w_experience: { type: Number, default: 0.25 },
+    isRemoved: {
+      type: Boolean,
+      default: false,
+    },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
