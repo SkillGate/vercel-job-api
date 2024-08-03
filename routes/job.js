@@ -81,7 +81,10 @@ router.get("/find/:id", verifyToken, async (req, res) => {
 router.get("/", verifyToken, async (req, res) => {
   const query = req.query.new;
   const filter = {
-    $or: [{ isActive: { $exists: false } }, { isActive: true }],
+    $and: [
+      { $or: [{ isActive: { $exists: false } }, { isActive: true }] },
+      { $or: [{ isRemoved: { $exists: false } }, { isRemoved: false }] },
+    ],
   };
 
   try {
@@ -375,7 +378,10 @@ router.put("/:id/isRemoved", verifyToken, async (req, res) => {
 
     const updatedJob = await Job.findByIdAndUpdate(
       jobId,
-      { isRemoved },
+      { 
+        isRemoved,
+        job_status: "Close" 
+      },
       { new: true }
     );
 
