@@ -1,4 +1,4 @@
-const BASE_URL = "https://1fdc-35-229-153-97.ngrok-free.app";
+const BASE_URL = "https://68a7-34-168-31-38.ngrok-free.app";
 
 const BENIFIT_BASE_URL = "https://a25c-34-30-66-247.ngrok-free.app";
 
