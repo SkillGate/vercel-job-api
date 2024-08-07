@@ -1,6 +1,6 @@
-const BASE_URL = "https://68a7-34-168-31-38.ngrok-free.app";
+const BASE_URL = "https://fd6e-34-83-157-164.ngrok-free.app";
 
-const BENIFIT_BASE_URL = "https://a25c-34-30-66-247.ngrok-free.app";
+const BENIFIT_BASE_URL = "https://02b0-35-223-167-167.ngrok-free.app";
 
 const PROD_AUTH_BASE_URL = "https://vercel-auth-api.vercel.app/api/v1";
 
